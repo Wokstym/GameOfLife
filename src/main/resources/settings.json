@@ -1,0 +1,12 @@
+{
+  "width": 50,
+  "height": 50,
+  "frequency": 30,
+  "patterns": [
+    "RandomPattern.json",
+    "QueenBeePattern.json",
+    "TumblerPattern.json",
+    "TestCase.json",
+    "GosperGliderGun.json"
+  ]
+}
