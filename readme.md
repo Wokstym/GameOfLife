@@ -1,10 +1,10 @@
 # Conway's Game of Life
 
-[![](https://img.shields.io/badge/Maven-3.6.1-yellow)](https://maven.apache.org)
+[![](https://img.shields.io/badge/Maven-3.6.1-red)](https://maven.apache.org)
 [![](https://img.shields.io/badge/Project_Lombok-1.18.12-blue)](https://mvnrepository.com/artifact/org.projectlombok/lombok)
-[![](https://img.shields.io/badge/Gson-2.8.6-orange)](https://mvnrepository.com/artifact/com.google.code.gson/gson)
 [![](https://img.shields.io/badge/JavaFX_Graphics-14.0.1-green)](https://mvnrepository.com/artifact/org.openjfx/javafx-graphics)
-[![](https://img.shields.io/badge/JSON.simple-1.1.1-red)](https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple)
+[![](https://img.shields.io/badge/Gson-2.8.6-orange)](https://mvnrepository.com/artifact/com.google.code.gson/gson)
+[![](https://img.shields.io/badge/JSON.simple-1.1.1-yellow)](https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple)
 
 ## Project description
 
@@ -14,6 +14,8 @@ It implements basic main rules of the game which can be red [here](https://en.wi
 ## Showcase 
 
 ![](res/GameOfLife.gif)
+
+##### Frequency was set to 30 Hz, but gif is converted to 15 fps, which results in little bit strange looking demo
 
 ## Usage
 
