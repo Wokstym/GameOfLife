@@ -1,13 +1,15 @@
 package codes.wokstym.GameOfLife.gui;
 
-import codes.wokstym.GameOfLife.BoardOperator;
+import codes.wokstym.GameOfLife.board.operator.BoardOperator;
 import codes.wokstym.GameOfLife.utils.JsonParser;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,12 +17,16 @@ public class GameFrame extends Application {
 
     static final int PIXEL_SIZE = 16;
 
-    public void show(String[] args) {
+    public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Main function for setting basic settings, declaring key event on Enter
+     * and starting application timer
+     */
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws IOException, ParseException {
 
         stage.setTitle("Game of Life");
         stage.setResizable(false);
@@ -30,22 +36,17 @@ public class GameFrame extends Application {
 
         if (boardOperator.getPatterns().isEmpty())
             throw new NullPointerException("No patterns defined in Json file");
-        boardOperator.genNewBoard(0);
+        boardOperator.setPattern(0);
 
-        int stageHeight = boardOperator.getHeight() * PIXEL_SIZE;
-        int stageWidth = boardOperator.getWidth() * PIXEL_SIZE;
+        int stageHeight = boardOperator.height * PIXEL_SIZE;
+        int stageWidth = boardOperator.width * PIXEL_SIZE;
 
         Pane rootNode = new Pane();
-        GameScene gameScene = new GameScene(rootNode, stageHeight, stageWidth);
+        GameScene gameScene = new GameScene(rootNode, stageHeight, stageWidth, boardOperator.getCurrentPatternBoard().getAllCells().keySet());
         gameScene.setOnKeyPressed(event -> {
-
             if (event.getCode().equals(KeyCode.ENTER)) {
-                try {
-                    boardOperator.switchPattern();
-                    gameScene.refreshScene(boardOperator.getCurrentPatternBoard().getAliveCells());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                boardOperator.switchPattern();
+                gameScene.refreshScene(boardOperator.getCurrentPatternBoard().getAllCells());
             }
         });
 
@@ -56,10 +57,10 @@ public class GameFrame extends Application {
             public void run() {
                 Platform.runLater(() -> {
                     boardOperator.tick();
-                    gameScene.refreshScene(boardOperator.getCurrentPatternBoard().getAliveCells());
+                    gameScene.refreshScene(boardOperator.getCurrentPatternBoard().getAllCells());
                 });
             }
-        }, 0, 1000 / boardOperator.getFrequency());
+        }, 0, 1000 / boardOperator.frequency);
 
     }
 

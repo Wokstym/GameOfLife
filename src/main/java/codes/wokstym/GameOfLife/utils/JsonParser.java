@@ -1,11 +1,13 @@
 package codes.wokstym.GameOfLife.utils;
 
-import codes.wokstym.GameOfLife.BoardOperator;
-import codes.wokstym.GameOfLife.board.Board;
-import codes.wokstym.GameOfLife.board.Utils.Position;
+import codes.wokstym.GameOfLife.board.operator.BoardOperator;
+import codes.wokstym.GameOfLife.board.operator.patternHolder.PatternHolder;
+import codes.wokstym.GameOfLife.board.operator.patternHolder.RandomPatternHolder;
+import codes.wokstym.GameOfLife.board.utils.Position;
 import com.google.gson.Gson;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -14,6 +16,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * Responsible for parsing json files to BoardOperator and PatternHolders
+ */
 public class JsonParser {
 
     private static final String RESOURCES_PATH = "src/main/resources/";
@@ -26,20 +31,39 @@ public class JsonParser {
         this.parser = new JSONParser();
     }
 
-    /* get instance of class - following singleton pattern */
+    /**
+     * Static function to assure there is only one instance of parser
+     * following a singleton pattern
+     *
+     * @return instance of a class
+     */
     public static JsonParser getInstance() {
-        if (instance == null) {
+        if (instance == null)
             instance = new JsonParser();
-        }
+
         return instance;
     }
 
-    public BoardOperator parseSettings() throws IOException {
+    /**
+     * Parses settings json, generates BoardOperator based on them
+     * and for every pattern defined in settings generates and adds a PatternHolder
+     *
+     * @return BoardOperator object with parsed settings
+     */
+    public BoardOperator parseSettings() throws IOException, ParseException {
         Reader reader = Files.newBufferedReader(Paths.get(RESOURCES_PATH + "settings.json"));
-        return gson.fromJson(reader, BoardOperator.class);
+        BoardOperator boardOperator = gson.fromJson(reader, BoardOperator.class);
+
+        Position upperLeft = new Position(0, 0);
+        Position lowerRight = new Position(boardOperator.width - 1, boardOperator.height- 1);
+
+        for (String pattern : boardOperator.getPatterns())
+            boardOperator.addPatternHolder(parsePositionList(pattern, upperLeft, lowerRight));
+
+        return boardOperator;
     }
 
-    public Board parsePositionList(String fileName, int width, int height) throws Exception {
+    private PatternHolder parsePositionList(String fileName, Position upperLeft, Position lowerRight) throws IOException, ParseException {
 
         ArrayList<Position> starterPositions;
         Reader reader = Files.newBufferedReader(Paths.get(RESOURCES_PATH + fileName));
@@ -47,15 +71,14 @@ public class JsonParser {
         Object obj = parser.parse(reader);
         if (obj instanceof JSONObject) {
             double ratio = (Double) ((JSONObject) obj).get("aliveToAllRatio");
-            Position upperLeft = new Position(0, 0);
-            Position lowerRight = new Position(width - 1, height - 1);
-            return new Board(Position.genRandomInBoundary((int) (width * height *ratio), upperLeft, lowerRight), upperLeft, lowerRight);
+            return new RandomPatternHolder(ratio, upperLeft, lowerRight);
         }
 
         reader = Files.newBufferedReader(Paths.get(RESOURCES_PATH + fileName));
+
         Position[] posArr = gson.fromJson(reader, Position[].class);
         starterPositions = new ArrayList<>(Arrays.asList(posArr));
-        return new Board(starterPositions, width, height);
+        return new PatternHolder(starterPositions, upperLeft, lowerRight);
     }
 
 

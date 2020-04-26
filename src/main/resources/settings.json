@@ -5,8 +5,6 @@
   "patterns": [
     "RandomPattern.json",
     "QueenBeePattern.json",
-    "TumblerPattern.json",
-    "TestCase.json",
-    "GosperGliderGun.json"
+    "TumblerPattern.json"
   ]
 }

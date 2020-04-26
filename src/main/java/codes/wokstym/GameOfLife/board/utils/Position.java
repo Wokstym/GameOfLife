@@ -1,22 +1,40 @@
-package codes.wokstym.GameOfLife.board.Utils;
+package codes.wokstym.GameOfLife.board.utils;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Representation of position on a two dimensional plane
+ */
 @Data
+@EqualsAndHashCode
 public class Position {
 
     final public int x;
     final public int y;
 
-    /* checks if this Position is in square defined by Upper Left Position and Lower Right Position */
+    /**
+     * Tests whether this Position is in a boundary
+     *
+     * @param upperLeft The upper left corner of the boundary
+     * @param lowerRight The lower right corner of the boundary
+     * @return true if Position is in a boundary, false otherwise
+     */
     public Boolean isInBoundary(Position upperLeft, Position lowerRight) {
         return this.follows(upperLeft) && this.precedes(lowerRight);
     }
 
-    /* generate List of Positions that are in a Boundary of upperLeft and lowerRight without repetitions*/
+    /**
+     * Generates list of Positions in a boundary without repetitions
+     *
+     * @param n Number of positions that is generated
+     * @param upperLeft The upper left corner of the boundary in which the positions is generated
+     * @param lowerRight The lower right corner of the boundary in which the positions is generated
+     * @return List of Positions generated
+     */
     public static List<Position> genRandomInBoundary(int n, Position upperLeft, Position lowerRight) {
 
         /* adds all possible spaces to list, shuffle it and returns subList of length n */
@@ -30,6 +48,20 @@ public class Position {
         return emptySpaces.subList(0, n);
     }
 
+    /**
+     * Generate neighbouring positions to this position. Neighbour is a position that is horizontally,
+     * vertically, or diagonally adjacent.
+     *
+     * @return List of 8 neighboring positions
+     */
+    public List<Position> getNeighbours() {
+        return neighboursDifferences
+                .stream()
+                .map(differencePos -> differencePos.genAddedPos(this))
+                .collect(Collectors.toList());
+    }
+
+
     /* constant List of 8 differences that are used to calculate position of neighbours by addition */
     private static final List<Position> neighboursDifferences = Arrays.asList(
             new Position(-1, -1),
@@ -40,14 +72,6 @@ public class Position {
             new Position(0, 1),
             new Position(-1, 1),
             new Position(-1, 0));
-
-    /* returns a List of Positions neighbouring to this Position */
-    public List<Position> getNeighbours() {
-        return neighboursDifferences
-                .stream()
-                .map(differencePos -> differencePos.genAddedPos(this))
-                .collect(Collectors.toList());
-    }
 
 
     private boolean precedes(Position other) {

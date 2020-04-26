@@ -1,71 +1,90 @@
 package codes.wokstym.GameOfLife.board;
 
-import codes.wokstym.GameOfLife.board.Utils.Position;
+import codes.wokstym.GameOfLife.board.utils.Cell;
+import codes.wokstym.GameOfLife.board.utils.Position;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Getter
+/**
+ * Representation of a plane which holds dead and alive cells. It is responsible for
+ * storing Cells and changing their state
+ *
+ */
+@AllArgsConstructor
 public class Board {
 
-    private Set<Position> aliveCells;
+    @Getter
+    private Set<Position> positionsOfAlive;
+    @Getter
+    private Map<Position, Cell> allCells;
 
-    private Position upperLeft;
-    private Position lowerRight;
+    final public Position upperLeft;
+    final public Position lowerRight;
 
-    /* Position in map starts from upper right corner */
-    public Board(List<Position> starterPositions, Position upperLeft, Position lowerRight) {
-        this.upperLeft = upperLeft;
-        this.lowerRight = lowerRight;
-        aliveCells = new HashSet<>();
-        if (starterPositions != null)
-            aliveCells.addAll(starterPositions);
+    /**
+     * Marks Cells as dead that meets the conditions - if it has number of neighbours that is more than
+     * first parameter or less than second parameter it will be marked as dead
+     *
+     * @param moreThan biggest number of neighbours that is enough to survive
+     * @param lessThan smallest number of neighbours that is enough to survive
+     */
+    public void setCellsAsDead(int moreThan, int lessThan) {
+
+        Set<Position> deadCellPositions = positionsOfAlive
+                .stream()
+                .filter(cellPosition -> {
+                    int neighboursNr = countAliveNeighbours(cellPosition);
+                    return neighboursNr < lessThan || neighboursNr > moreThan;
+                })
+                .collect(Collectors.toSet());
+
+        for (Position cellPosition : deadCellPositions) {
+            positionsOfAlive.remove(cellPosition);
+            allCells.get(cellPosition).setAlive(false);
+        }
     }
 
-    public Board(List<Position> starterPositions, int width, int height) {
-        this(starterPositions, new Position(0, 0), new Position(width - 1, height - 1));
+    /**
+     * Mark Cell as alive
+     *
+     * @param cellPosition Position on map of the cell
+     */
+    public void setCellAlive(Position cellPosition) {
+        Cell cell = allCells.get(cellPosition);
+        cell.setAlive(true);
+        positionsOfAlive.add(cellPosition);
     }
 
-    private int countNeighboursNr(Position position) {
+    private int countAliveNeighbours(Position position) {
         return (int) position
                 .getNeighbours()
                 .stream()
-                .filter(neighbourPos -> neighbourPos.isInBoundary(upperLeft, lowerRight) && aliveCells.contains(neighbourPos))
+                .filter(neighbourPos -> neighbourPos.isInBoundary(upperLeft, lowerRight) && positionsOfAlive.contains(neighbourPos))
                 .count();
     }
 
-    public void removeCells(int smallerOrEqThan, int greaterOrEqThan) {
-        aliveCells = aliveCells
-                .stream()
-                .filter(cell -> {
-                    int neighboursNr = countNeighboursNr(cell);
-                    return neighboursNr <= smallerOrEqThan && neighboursNr >= greaterOrEqThan;
-                })
-                .collect(Collectors.toSet());
-    }
 
-    public void addCell(Position cell) {
-        aliveCells.add(cell);
-    }
-
-    /* testing */
+    /**
+     * Convert board into string for testing purposes.
+     *
+     * @return String representation of board
+     */
     public String toString() {
-        StringBuilder x = new StringBuilder();
-        x.append("\n========================================================\n");
-        for (int i = 0; i < lowerRight.x; i++) {
-            for (int j = 0; j < lowerRight.y; j++) {
-                if (aliveCells.contains(new Position(j, i)))
-                    x.append("X");
+        StringBuilder resultBuilder = new StringBuilder();
+        resultBuilder.append("\n========================================================\n");
+        for (int i = upperLeft.x; i < lowerRight.x; i++) {
+            for (int j = upperLeft.y; j < lowerRight.y; j++) {
+                if (positionsOfAlive.contains(new Position(j, i)))
+                    resultBuilder.append("X");
                 else
-                    x.append(" ");
+                    resultBuilder.append(" ");
             }
-            x.append("\n");
+            resultBuilder.append("\n");
         }
-        x.append("========================================================\n");
-
-        return x.toString();
-
+        resultBuilder.append("========================================================\n");
+        return resultBuilder.toString();
     }
-
 }
